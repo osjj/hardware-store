@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { StrapiNews } from '@/types'
-import { truncateText } from '@/lib/utils'
+import { truncateText, getStrapiImageUrl } from '@/lib/utils'
 
 interface NewsCardProps {
   news: StrapiNews
@@ -14,8 +14,9 @@ const categoryLabels: Record<string, string> = {
 }
 
 export default function NewsCard({ news }: NewsCardProps) {
-  const { title, slug, content, cover, publishDate, category } = news.attributes
-  const coverUrl = cover?.data?.attributes.url
+  // Strapi v5: 直接访问属性，cover 是数组
+  const { title, slug, content, cover, publishDate, category } = news
+  const coverUrl = getStrapiImageUrl(cover?.[0]?.url)
   const summary = truncateText(content.replace(/<[^>]*>/g, ''), 100)
 
   return (

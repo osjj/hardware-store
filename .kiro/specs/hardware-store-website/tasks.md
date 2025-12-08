@@ -80,7 +80,7 @@
     - 创建 components/layout/MobileNav.tsx（移动端导航抽屉）
     - _Requirements: 9.1, 9.2_
 
-  - [-] 4.2 实现通用 UI 组件
+  - [x] 4.2 实现通用 UI 组件
 
     - 创建 components/common/Button.tsx
     - 创建 components/common/Input.tsx

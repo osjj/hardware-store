@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import fc from 'fast-check'
-import { truncateText } from '@/lib/utils'
-import type { StrapiNews, NewsCategory, NewsListItem } from '@/types'
+import { truncateText, getStrapiImageUrl } from '@/lib/utils'
+import type { StrapiNews, NewsCategory, NewsListItem, StrapiMediaItem } from '@/types'
 
-// Helper function to render news list item (extracted for testing)
+// Helper function to render news list item (Strapi v5 扁平化结构)
 function renderNewsListItem(news: StrapiNews, summaryLength: number = 100): NewsListItem {
-  const { title, slug, content, cover, publishDate, category } = news.attributes
-  const coverUrl = cover?.data?.attributes.url || null
+  // Strapi v5: 直接访问属性，cover 是数组
+  const { title, slug, content, cover, publishDate, category } = news
+  const coverUrl = getStrapiImageUrl(cover?.[0]?.url)
   const summary = truncateText(content.replace(/<[^>]*>/g, ''), summaryLength)
 
   return {
@@ -20,34 +21,32 @@ function renderNewsListItem(news: StrapiNews, summaryLength: number = 100): News
   }
 }
 
-// Test data generators
+// Test data generators (Strapi v5 扁平化结构)
 const newsCategoryArbitrary = fc.constantFrom('company', 'industry', 'product') as fc.Arbitrary<NewsCategory>
 
-const strapiNewsArbitrary = fc.record({
+const strapiMediaItemArbitrary: fc.Arbitrary<StrapiMediaItem> = fc.record({
   id: fc.integer({ min: 1 }),
-  attributes: fc.record({
-    title: fc.string({ minLength: 1, maxLength: 100 }),
-    slug: fc.string({ minLength: 1, maxLength: 50 }),
-    content: fc.string({ minLength: 0, maxLength: 1000 }),
-    cover: fc.oneof(
-      fc.constant({ data: null }),
-      fc.record({
-        data: fc.record({
-          id: fc.integer({ min: 1 }),
-          attributes: fc.record({
-            url: fc.webUrl(),
-            width: fc.integer({ min: 100, max: 2000 }),
-            height: fc.integer({ min: 100, max: 2000 }),
-            alternativeText: fc.option(fc.string(), { nil: null }),
-          }),
-        }),
-      })
-    ),
-    publishDate: fc.date({ min: new Date('2020-01-01'), max: new Date('2025-12-31') })
-      .map((d) => d.toISOString().split('T')[0]),
-    category: newsCategoryArbitrary,
-  }),
-}) as fc.Arbitrary<StrapiNews>
+  documentId: fc.uuid(),
+  url: fc.webUrl(),
+  width: fc.integer({ min: 100, max: 2000 }),
+  height: fc.integer({ min: 100, max: 2000 }),
+  alternativeText: fc.option(fc.string(), { nil: null }),
+})
+
+const strapiNewsArbitrary: fc.Arbitrary<StrapiNews> = fc.record({
+  id: fc.integer({ min: 1 }),
+  documentId: fc.uuid(),
+  title: fc.string({ minLength: 1, maxLength: 100 }),
+  slug: fc.string({ minLength: 1, maxLength: 50 }),
+  content: fc.string({ minLength: 0, maxLength: 1000 }),
+  cover: fc.oneof(
+    fc.constant(null),
+    fc.array(strapiMediaItemArbitrary, { minLength: 1, maxLength: 3 })
+  ),
+  publishDate: fc.date({ min: new Date('2020-01-01'), max: new Date('2025-12-31') })
+    .map((d) => d.toISOString().split('T')[0]),
+  category: newsCategoryArbitrary,
+})
 
 describe('News Rendering - Property Tests', () => {
   /**
@@ -63,8 +62,8 @@ describe('News Rendering - Property Tests', () => {
         (news) => {
           const rendered = renderNewsListItem(news)
           
-          // Title should be present and match original
-          return rendered.title === news.attributes.title && rendered.title.length > 0
+          // Title should be present and match original (Strapi v5 扁平化)
+          return rendered.title === news.title && rendered.title.length > 0
         }
       ),
       { numRuns: 100 }
@@ -78,8 +77,8 @@ describe('News Rendering - Property Tests', () => {
         (news) => {
           const rendered = renderNewsListItem(news)
           
-          // PublishDate should be present and match original
-          return rendered.publishDate === news.attributes.publishDate
+          // PublishDate should be present and match original (Strapi v5 扁平化)
+          return rendered.publishDate === news.publishDate
         }
       ),
       { numRuns: 100 }
@@ -97,8 +96,8 @@ describe('News Rendering - Property Tests', () => {
           // Summary should be present
           const hasSummary = typeof rendered.summary === 'string'
           
-          // Summary should be truncated if content is longer
-          const plainContent = news.attributes.content.replace(/<[^>]*>/g, '')
+          // Summary should be truncated if content is longer (Strapi v5 扁平化)
+          const plainContent = news.content.replace(/<[^>]*>/g, '')
           const isTruncated = plainContent.length <= summaryLength 
             ? rendered.summary === plainContent
             : rendered.summary.length <= summaryLength + 3 // +3 for "..."
@@ -117,8 +116,8 @@ describe('News Rendering - Property Tests', () => {
         (news) => {
           const rendered = renderNewsListItem(news)
           
-          // Category should be present and match original
-          return rendered.category === news.attributes.category
+          // Category should be present and match original (Strapi v5 扁平化)
+          return rendered.category === news.category
         }
       ),
       { numRuns: 100 }
@@ -148,7 +147,8 @@ describe('News Rendering - Property Tests', () => {
         (news) => {
           const rendered = renderNewsListItem(news)
           
-          return rendered.slug === news.attributes.slug
+          // Strapi v5 扁平化
+          return rendered.slug === news.slug
         }
       ),
       { numRuns: 100 }

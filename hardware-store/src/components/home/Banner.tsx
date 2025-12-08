@@ -3,10 +3,28 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { StrapiBanner } from '@/types'
+
+// Strapi v5 扁平化数据结构
+interface BannerImage {
+  id: number
+  url: string
+  width?: number
+  height?: number
+  alternativeText?: string | null
+}
+
+interface BannerData {
+  id: number
+  documentId?: string
+  title: string
+  link: string | null
+  sort: number
+  active: boolean
+  image: BannerImage[] | null
+}
 
 interface BannerProps {
-  banners: StrapiBanner[]
+  banners: BannerData[]
 }
 
 export default function Banner({ banners }: BannerProps) {
@@ -31,15 +49,20 @@ export default function Banner({ banners }: BannerProps) {
   }
 
   const currentBanner = banners[currentIndex]
-  const imageUrl = currentBanner.attributes.image?.data?.attributes.url
+  // Strapi v5: image 是数组，直接取第一个元素的 url
+  const imageUrl = currentBanner.image?.[0]?.url
+
+  // 构建完整的图片 URL（如果是相对路径）
+  const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://admin.bunnybot.top'
+  const fullImageUrl = imageUrl?.startsWith('http') ? imageUrl : `${STRAPI_URL}${imageUrl}`
 
   return (
     <div className="relative w-full h-64 md:h-96 overflow-hidden">
       {imageUrl ? (
-        <Link href={currentBanner.attributes.link || '#'}>
+        <Link href={currentBanner.link || '#'}>
           <Image
-            src={imageUrl}
-            alt={currentBanner.attributes.title}
+            src={fullImageUrl}
+            alt={currentBanner.title}
             fill
             className="object-cover"
             priority
@@ -48,7 +71,7 @@ export default function Banner({ banners }: BannerProps) {
       ) : (
         <div className="w-full h-full bg-gradient-to-r from-primary to-blue-600 flex items-center justify-center">
           <h2 className="text-white text-2xl md:text-4xl font-bold">
-            {currentBanner.attributes.title}
+            {currentBanner.title}
           </h2>
         </div>
       )}

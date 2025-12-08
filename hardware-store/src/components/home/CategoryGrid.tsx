@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { StrapiCategory } from '@/types'
+import { getStrapiImageUrl } from '@/lib/utils'
 
 interface CategoryGridProps {
   categories: StrapiCategory[]
@@ -17,19 +18,20 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
         <h2 className="text-2xl font-bold text-center mb-8">产品分类</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {categories.map((category) => {
-            const iconUrl = category.attributes.icon?.data?.attributes.url
+            // Strapi v5: icon 是数组
+            const iconUrl = getStrapiImageUrl(category.icon?.[0]?.url)
             
             return (
               <Link
                 key={category.id}
-                href={`/products?category=${category.attributes.slug}`}
+                href={`/products?category=${category.slug}`}
                 className="bg-white rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow"
               >
                 {iconUrl ? (
                   <div className="relative w-16 h-16 mx-auto mb-4">
                     <Image
                       src={iconUrl}
-                      alt={category.attributes.name}
+                      alt={category.name}
                       fill
                       className="object-contain"
                     />
@@ -39,7 +41,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                     <span className="text-2xl">📦</span>
                   </div>
                 )}
-                <h3 className="font-medium text-gray-800">{category.attributes.name}</h3>
+                <h3 className="font-medium text-gray-800">{category.name}</h3>
               </Link>
             )
           })}

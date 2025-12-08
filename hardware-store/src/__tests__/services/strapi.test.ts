@@ -1,56 +1,53 @@
 import { describe, it, expect } from 'vitest'
 import fc from 'fast-check'
 import { filterProductsByCategory, filterNewsByCategory } from '@/services/strapi'
-import type { StrapiProduct, StrapiNews, NewsCategory } from '@/types'
+import type { StrapiProduct, StrapiNews, NewsCategory, StrapiCategory } from '@/types'
 
-// Test data generators
-const categoryArbitrary = fc.constantFrom('劳保用品', '五金工具', '安全设备', '电动工具')
+// Test data generators (Strapi v5 扁平化结构)
+const categorySlugArbitrary = fc.constantFrom('测试2用品', '测试1工具', '安全设备', '电动工具')
 
-const strapiProductArbitrary = fc.record({
+const strapiCategoryArbitrary: fc.Arbitrary<StrapiCategory | null> = fc.oneof(
+  fc.constant(null),
+  fc.record({
+    id: fc.integer({ min: 1 }),
+    documentId: fc.uuid(),
+    name: categorySlugArbitrary,
+    slug: categorySlugArbitrary,
+    icon: fc.constant(null),
+    parent: fc.constant(null),
+    sort: fc.integer({ min: 0, max: 100 }),
+  })
+)
+
+const strapiProductArbitrary: fc.Arbitrary<StrapiProduct> = fc.record({
   id: fc.integer({ min: 1 }),
-  attributes: fc.record({
-    name: fc.string({ minLength: 1, maxLength: 100 }),
-    slug: fc.string({ minLength: 1, maxLength: 50 }),
-    description: fc.string(),
-    images: fc.constant({ data: [] }),
-    category: fc.oneof(
-      fc.constant({ data: null }),
-      fc.record({
-        data: fc.record({
-          id: fc.integer({ min: 1 }),
-          attributes: fc.record({
-            name: categoryArbitrary,
-            slug: categoryArbitrary,
-            icon: fc.constant({ data: null }),
-            parent: fc.constant({ data: null }),
-            sort: fc.integer({ min: 0, max: 100 }),
-          }),
-        }),
-      })
-    ),
-    medusa_product_id: fc.uuid(),
-    specs: fc.constant(null),
-    seo_title: fc.constant(null),
-    seo_description: fc.constant(null),
-    featured: fc.boolean(),
-    createdAt: fc.date().map((d) => d.toISOString()),
-    updatedAt: fc.date().map((d) => d.toISOString()),
-  }),
-}) as fc.Arbitrary<StrapiProduct>
+  documentId: fc.uuid(),
+  name: fc.string({ minLength: 1, maxLength: 100 }),
+  slug: fc.string({ minLength: 1, maxLength: 50 }),
+  description: fc.string(),
+  images: fc.constant(null),
+  category: strapiCategoryArbitrary,
+  medusa_product_id: fc.option(fc.uuid(), { nil: null }),
+  specs: fc.constant(null),
+  seo_title: fc.constant(null),
+  seo_description: fc.constant(null),
+  featured: fc.boolean(),
+  createdAt: fc.date().map((d) => d.toISOString()),
+  updatedAt: fc.date().map((d) => d.toISOString()),
+})
 
 const newsCategoryArbitrary = fc.constantFrom('company', 'industry', 'product') as fc.Arbitrary<NewsCategory>
 
-const strapiNewsArbitrary = fc.record({
+const strapiNewsArbitrary: fc.Arbitrary<StrapiNews> = fc.record({
   id: fc.integer({ min: 1 }),
-  attributes: fc.record({
-    title: fc.string({ minLength: 1, maxLength: 100 }),
-    slug: fc.string({ minLength: 1, maxLength: 50 }),
-    content: fc.string(),
-    cover: fc.constant({ data: null }),
-    publishDate: fc.date().map((d) => d.toISOString().split('T')[0]),
-    category: newsCategoryArbitrary,
-  }),
-}) as fc.Arbitrary<StrapiNews>
+  documentId: fc.uuid(),
+  title: fc.string({ minLength: 1, maxLength: 100 }),
+  slug: fc.string({ minLength: 1, maxLength: 50 }),
+  content: fc.string(),
+  cover: fc.constant(null),
+  publishDate: fc.date().map((d) => d.toISOString().split('T')[0]),
+  category: newsCategoryArbitrary,
+})
 
 describe('Strapi Service - Property Tests', () => {
   /**
@@ -63,14 +60,12 @@ describe('Strapi Service - Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(strapiProductArbitrary, { minLength: 0, maxLength: 20 }),
-        categoryArbitrary,
+        categorySlugArbitrary,
         (products, categorySlug) => {
           const filtered = filterProductsByCategory(products, categorySlug)
           
-          // All filtered products must have matching category
-          return filtered.every(
-            (p) => p.attributes.category?.data?.attributes.slug === categorySlug
-          )
+          // All filtered products must have matching category (Strapi v5 扁平化)
+          return filtered.every((p) => p.category?.slug === categorySlug)
         }
       ),
       { numRuns: 100 }
@@ -91,8 +86,8 @@ describe('Strapi Service - Property Tests', () => {
         (news, category) => {
           const filtered = filterNewsByCategory(news, category)
           
-          // All filtered news must have matching category
-          return filtered.every((n) => n.attributes.category === category)
+          // All filtered news must have matching category (Strapi v5 扁平化)
+          return filtered.every((n) => n.category === category)
         }
       ),
       { numRuns: 100 }
@@ -104,7 +99,7 @@ describe('Strapi Service - Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(strapiProductArbitrary, { minLength: 0, maxLength: 20 }),
-        categoryArbitrary,
+        categorySlugArbitrary,
         (products, categorySlug) => {
           const filtered = filterProductsByCategory(products, categorySlug)
           
@@ -121,7 +116,7 @@ describe('Strapi Service - Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(strapiProductArbitrary, { minLength: 0, maxLength: 20 }),
-        categoryArbitrary,
+        categorySlugArbitrary,
         (products, categorySlug) => {
           const filtered1 = filterProductsByCategory(products, categorySlug)
           const filtered2 = filterProductsByCategory(filtered1, categorySlug)

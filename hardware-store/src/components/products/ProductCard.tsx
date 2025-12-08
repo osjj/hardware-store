@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { StrapiProduct } from '@/types'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, getStrapiImageUrl } from '@/lib/utils'
 
 interface ProductCardProps {
   product: StrapiProduct
@@ -10,9 +10,10 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, price, inStock = true }: ProductCardProps) {
-  const { name, slug, images, category } = product.attributes
-  const imageUrl = images?.data?.[0]?.attributes.url
-  const categoryName = category?.data?.attributes.name
+  // Strapi v5: 直接访问属性，images 是数组
+  const { name, slug, images, category } = product
+  const imageUrl = getStrapiImageUrl(images?.[0]?.url)
+  const categoryName = category?.name
 
   return (
     <Link

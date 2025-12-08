@@ -10,7 +10,7 @@ export default async function Home() {
     getCategories().catch(() => []),
     getProducts({ featured: true, pageSize: 8 }).catch(() => ({ products: [], pagination: { page: 1, pageCount: 1, total: 0 } })),
   ])
-  console.log(1222,banners,categories,products)
+
   return (
     <>
       <Banner banners={banners} />

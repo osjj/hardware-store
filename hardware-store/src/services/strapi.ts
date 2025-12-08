@@ -148,19 +148,17 @@ export async function submitContact(data: ContactFormData): Promise<void> {
   })
 }
 
-// 筛选工具函数
+// 筛选工具函数 (Strapi v5 扁平化结构)
 export function filterProductsByCategory(
   products: StrapiProduct[],
   categorySlug: string
 ): StrapiProduct[] {
-  return products.filter(
-    (p) => p.attributes.category?.data?.attributes.slug === categorySlug
-  )
+  return products.filter((p) => p.category?.slug === categorySlug)
 }
 
 export function filterNewsByCategory(
   news: StrapiNews[],
   category: string
 ): StrapiNews[] {
-  return news.filter((n) => n.attributes.category === category)
+  return news.filter((n) => n.category === category)
 }

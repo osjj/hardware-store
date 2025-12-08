@@ -14,12 +14,12 @@ export default async function AboutPage() {
         {page ? (
           <div 
             className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: page.attributes.content }}
+            dangerouslySetInnerHTML={{ __html: page.content }}
           />
         ) : (
           <div className="text-gray-600 space-y-4">
             <p>
-              我们是一家专业的五金劳保用品供应商，致力于为企业和个人客户提供优质的五金工具和劳保用品。
+              我们是一家专业的测试1测试2用品供应商，致力于为企业和个人客户提供优质的测试1工具和测试2用品。
             </p>
             <p>
               公司成立以来，始终坚持"品质第一、服务至上"的经营理念，与多家知名品牌建立了长期稳定的合作关系，
@@ -39,7 +39,7 @@ export default async function AboutPage() {
         <div className="max-w-2xl mx-auto">
           <div className="relative border-l-2 border-primary pl-8 space-y-8">
             {[
-              { year: '2020', event: '公司成立，开始五金劳保用品批发业务' },
+              { year: '2020', event: '公司成立，开始测试1测试2用品批发业务' },
               { year: '2021', event: '建立自有仓储中心，提升配送效率' },
               { year: '2022', event: '与多家知名品牌达成战略合作' },
               { year: '2023', event: '上线电商平台，服务更多客户' },
@@ -78,8 +78,8 @@ export default async function AboutPage() {
         <h2 className="text-xl font-bold mb-8 text-center">企业价值观</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {[
-            { icon: '🎯', title: '使命', desc: '为客户提供优质的五金劳保产品和服务' },
-            { icon: '👁️', title: '愿景', desc: '成为行业领先的五金劳保用品供应商' },
+            { icon: '🎯', title: '使命', desc: '为客户提供优质的测试1测试2产品和服务' },
+            { icon: '👁️', title: '愿景', desc: '成为行业领先的测试1测试2用品供应商' },
             { icon: '💎', title: '价值观', desc: '诚信、专业、创新、共赢' },
           ].map((item, index) => (
             <div key={index} className="bg-white rounded-lg p-6 text-center">

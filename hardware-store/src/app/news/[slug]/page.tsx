@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getNewsBySlug } from '@/services/strapi'
+import { getStrapiImageUrl } from '@/lib/utils'
 
 export const revalidate = 300
 
@@ -22,8 +23,9 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     notFound()
   }
 
-  const { title, content, cover, publishDate, category } = news.attributes
-  const coverUrl = cover?.data?.attributes.url
+  // Strapi v5: 直接访问属性，cover 是数组
+  const { title, content, cover, publishDate, category } = news
+  const coverUrl = getStrapiImageUrl(cover?.[0]?.url)
 
   return (
     <div className="container mx-auto px-4 py-8">

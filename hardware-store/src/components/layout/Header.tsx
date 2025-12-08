@@ -13,7 +13,7 @@ export default function Header() {
     <header className="bg-primary text-white shadow-md relative">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold">
-          五金劳保
+          测试1测试2
         </Link>
         <nav className="hidden md:flex space-x-6">
           <Link href="/" className="hover:text-secondary">首页</Link>

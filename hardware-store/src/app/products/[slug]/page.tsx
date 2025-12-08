@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { getProductBySlug } from '@/services/strapi'
 import { getMedusaProductById, getLowestPrice, checkInStock } from '@/services/medusa'
 import { AddToCartButton } from '@/components/products'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, getStrapiImageUrl } from '@/lib/utils'
 
 export const revalidate = 300
 
@@ -18,7 +18,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     notFound()
   }
 
-  const { name, description, images, category, medusa_product_id, specs } = product.attributes
+  // Strapi v5: 直接访问属性
+  const { name, description, images, category, medusa_product_id, specs } = product
   
   // Fetch Medusa data if available
   let medusaProduct = null
@@ -35,8 +36,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     }
   }
 
-  const imageUrls = images?.data?.map((img) => img.attributes.url) || []
-  const categoryName = category?.data?.attributes.name
+  // Strapi v5: images 是数组
+  const imageUrls = images?.map((img) => getStrapiImageUrl(img.url)).filter(Boolean) as string[] || []
+  const categoryName = category?.name
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -4,8 +4,8 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
-  title: '五金劳保 - 专业五金工具与劳保用品供应商',
-  description: '提供优质五金工具、劳保用品，品质保障，快速发货',
+  title: '测试1测试2 - 专业测试1工具与测试2用品供应商',
+  description: '提供优质测试1工具、测试2用品，品质保障，快速发货',
 }
 
 export default function RootLayout({

@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-bold mb-4">关于我们</h3>
-            <p className="text-gray-400">专业五金工具与劳保用品供应商，品质保障，快速发货。</p>
+            <p className="text-gray-400">专业测试1工具与测试2用品供应商，品质保障，快速发货。</p>
           </div>
           <div>
             <h3 className="text-lg font-bold mb-4">快速链接</h3>
@@ -28,7 +28,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-700 mt-8 pt-4 text-center text-gray-400">
-          <p>© 2024 五金劳保. All rights reserved.</p>
+          <p>© 2024 测试1测试2. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-import type { StrapiCategoryAttributes } from './strapi'
+import type { StrapiCategory } from './strapi'
 import type { MedusaVariant } from './medusa'
 
 // 整合 Strapi + Medusa 的产品类型

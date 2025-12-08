@@ -18,7 +18,8 @@ export default function ProductGrid({ products, prices = {} }: ProductGridProps)
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {products.map((product) => {
-        const medusaId = product.attributes.medusa_product_id
+        // Strapi v5: 直接访问属性
+        const medusaId = product.medusa_product_id
         const priceData = medusaId ? prices[medusaId] : undefined
         
         return (

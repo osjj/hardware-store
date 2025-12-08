@@ -40,14 +40,14 @@ export default function ProductFilter({ categories }: ProductFilterProps) {
         {categories.map((category) => (
           <button
             key={category.id}
-            onClick={() => handleCategoryChange(category.attributes.slug)}
+            onClick={() => handleCategoryChange(category.slug)}
             className={`px-4 py-2 rounded-full text-sm transition-colors ${
-              currentCategory === category.attributes.slug
+              currentCategory === category.slug
                 ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            {category.attributes.name}
+            {category.name}
           </button>
         ))}
       </div>
