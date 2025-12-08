@@ -87,7 +87,7 @@ export async function getProductBySlug(slug: string): Promise<StrapiProduct | nu
 // 分类相关
 export async function getCategories(): Promise<StrapiCategory[]> {
   const response = await fetchStrapi<StrapiResponse<StrapiCategory[]>>(
-    '/categories?populate=icon,parent&sort=sort:asc'
+    '/categories?sort=sort:asc'
   )
   return response.data
 }
