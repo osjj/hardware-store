@@ -22,16 +22,26 @@ async function fetchStrapi<T>(endpoint: string, options?: RequestInit): Promise<
     headers['Authorization'] = `Bearer ${STRAPI_TOKEN}`
   }
 
+  console.log('=== Strapi Fetch ===')
+  console.log('URL:', url)
+  console.log('Has Token:', !!STRAPI_TOKEN)
+
   const res = await fetch(url, {
     ...options,
     headers: { ...headers, ...options?.headers },
   })
 
+  console.log('Response Status:', res.status, res.statusText)
+
   if (!res.ok) {
+    const errorText = await res.text()
+    console.error('Strapi Error Response:', errorText)
     throw new Error(`Strapi API error: ${res.status} ${res.statusText}`)
   }
 
-  return res.json()
+  const data = await res.json()
+  console.log('Response Data Length:', JSON.stringify(data).length)
+  return data
 }
 
 // Banner 相关
@@ -48,7 +58,9 @@ export async function getProducts(params?: ProductQueryParams): Promise<{
   pagination: { page: number; pageCount: number; total: number }
 }> {
   const searchParams = new URLSearchParams()
-  searchParams.set('populate', 'images,category')
+  // Strapi v5: 使用数组语法 populate 多个字段
+  searchParams.append('populate[0]', 'images')
+  searchParams.append('populate[1]', 'category')
   
   if (params?.category) {
     searchParams.set('filters[category][slug][$eq]', params.category)
@@ -79,7 +91,7 @@ export async function getProducts(params?: ProductQueryParams): Promise<{
 
 export async function getProductBySlug(slug: string): Promise<StrapiProduct | null> {
   const response = await fetchStrapi<StrapiResponse<StrapiProduct[]>>(
-    `/products?filters[slug][$eq]=${slug}&populate=images,category`
+    `/products?filters[slug][$eq]=${slug}&populate[0]=images&populate[1]=category`
   )
   return response.data[0] || null
 }

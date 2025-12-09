@@ -14,12 +14,32 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const page = parseInt(searchParams.page || '1', 10)
   const category = searchParams.category
 
-  // Fetch data in parallel
-  const [{ products, pagination }, categories, medusaProducts] = await Promise.all([
-    getProducts({ category, page, pageSize: 12 }),
-    getCategories(),
-    getMedusaProducts().catch(() => []),
-  ])
+  // Fetch data in parallel with error handling
+  let products: Awaited<ReturnType<typeof getProducts>>['products'] = []
+  let pagination = { page: 1, pageCount: 1, total: 0 }
+  let categories: Awaited<ReturnType<typeof getCategories>> = []
+  let medusaProducts: Awaited<ReturnType<typeof getMedusaProducts>> = []
+
+  try {
+    const [productsResult, categoriesResult, medusaResult] = await Promise.all([
+      getProducts({ category, page, pageSize: 12 }),
+      getCategories(),
+      getMedusaProducts().catch(() => []),
+    ])
+    products = productsResult.products
+    pagination = productsResult.pagination
+    categories = categoriesResult
+    medusaProducts = medusaResult
+    console.log('=== Products Page Debug ===')
+    console.log('Category filter:', category)
+    console.log('Products count:', products.length)
+    console.log('Categories count:', categories.length)
+    console.log('Products:', JSON.stringify(products, null, 2))
+    console.log('Categories:', JSON.stringify(categories, null, 2))
+  } catch (error) {
+    console.error('Failed to fetch products:', error)
+    // 继续渲染空数据，而不是抛出错误
+  }
 
   // Build price map from Medusa products
   const priceMap: Record<string, { price: number | null; inStock: boolean }> = {}
